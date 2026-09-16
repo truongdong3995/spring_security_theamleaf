@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${student.fullName} + ' - EduManager'">Chi tiết học sinh</title>
+    <link rel="stylesheet" th:href="@{/css/students.css}">
+</head>
+<body>
+<header class="topbar">
+    <a class="brand" th:href="@{/home}">
+        <span class="brand-mark">ED</span>
+        <span>EduManager</span>
+    </a>
+    <a class="btn btn-ghost btn-small" th:href="@{/students}">Danh sách học sinh</a>
+</header>
+
+<main class="detail-shell">
+    <a class="back-link" th:href="@{/students}">← Quay lại danh sách</a>
+    <div class="alert alert-success" th:if="${successMessage}" th:text="${successMessage}"></div>
+
+    <section class="profile-card">
+        <div class="profile-cover"></div>
+        <div class="profile-header">
+            <div class="profile-avatar" th:text="${#strings.substring(student.fullName, 0, 1)}">H</div>
+            <div class="profile-title">
+                <div class="profile-name-row">
+                    <h1 th:text="${student.fullName}">Nguyễn Văn An</h1>
+                    <span class="status" th:classappend="${student.active} ? 'status-active' : 'status-inactive'"
+                          th:text="${student.active} ? 'Đang học' : 'Đã nghỉ'">Đang học</span>
+                </div>
+                <p><span class="code" th:text="${student.studentCode}">HS001</span> · Lớp <strong th:text="${student.className}">10A1</strong></p>
+            </div>
+            <a class="btn btn-primary" th:href="@{/students/{id}/edit(id=${student.id})}">Chỉnh sửa hồ sơ</a>
+        </div>
+
+        <div class="detail-grid">
+            <div class="detail-main">
+                <h2>Thông tin học sinh</h2>
+                <dl class="info-list">
+                    <div>
+                        <dt>Mã học sinh</dt>
+                        <dd th:text="${student.studentCode}">HS001</dd>
+                    </div>
+                    <div>
+                        <dt>Lớp hiện tại</dt>
+                        <dd th:text="${student.className}">10A1</dd>
+                    </div>
+                    <div>
+                        <dt>Ngày sinh</dt>
+                        <dd th:text="${student.dateOfBirth != null ? #temporals.format(student.dateOfBirth, 'dd/MM/yyyy') : 'Chưa cập nhật'}">01/01/2010</dd>
+                    </div>
+                    <div>
+                        <dt>Giới tính</dt>
+                        <dd th:text="${student.gender}">Nam</dd>
+                    </div>
+                    <div>
+                        <dt>Email</dt>
+                        <dd th:text="${student.email ?: 'Chưa cập nhật'}">email@example.com</dd>
+                    </div>
+                    <div>
+                        <dt>Số điện thoại</dt>
+                        <dd th:text="${student.phone ?: 'Chưa cập nhật'}">0900000000</dd>
+                    </div>
+                </dl>
+            </div>
+
+            <aside class="detail-aside">
+                <h2>Thao tác nhanh</h2>
+                <a class="quick-action" th:href="@{/students/{id}/edit(id=${student.id})}">
+                    <span>✎</span><span><strong>Cập nhật thông tin</strong><small>Chỉnh sửa hồ sơ học sinh</small></span>
+                </a>
+                <a class="quick-action" th:href="@{/students}">
+                    <span>☷</span><span><strong>Danh sách học sinh</strong><small>Trở về trang quản lý</small></span>
+                </a>
+                <form th:action="@{/students/{id}/delete(id=${student.id})}" method="post"
+                      onsubmit="return confirm('Bạn có chắc muốn xóa học sinh này? Dữ liệu sẽ không thể khôi phục.');">
+                    <button class="quick-action quick-danger" type="submit">
+                        <span>×</span><span><strong>Xóa hồ sơ</strong><small>Xóa học sinh khỏi hệ thống</small></span>
+                    </button>
+                </form>
+            </aside>
+        </div>
+    </section>
+</main>
+</body>
+</html>

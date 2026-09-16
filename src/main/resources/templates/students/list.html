@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Quản lý học sinh</title>
+    <link rel="stylesheet" th:href="@{/css/students.css}">
+</head>
+<body>
+<header class="topbar">
+    <a class="brand" th:href="@{/home}">
+        <span class="brand-mark">ED</span>
+        <span>EduManager</span>
+    </a>
+    <nav class="topbar-actions">
+        <span class="signed-in" sec:authorize="isAuthenticated()">
+            Xin chào, <strong sec:authentication="principal.firstName">Bạn</strong>
+        </span>
+        <form th:action="@{/logout}" method="post">
+            <button class="btn btn-ghost btn-small" type="submit">Đăng xuất</button>
+        </form>
+    </nav>
+</header>
+
+<main class="page-shell">
+    <section class="page-heading">
+        <div>
+            <p class="eyebrow">HỒ SƠ NHÀ TRƯỜNG</p>
+            <h1>Quản lý học sinh</h1>
+            <p class="page-description">Theo dõi hồ sơ, lớp học và trạng thái của học sinh.</p>
+        </div>
+        <a class="btn btn-primary" th:href="@{/students/new}">
+            <span aria-hidden="true">＋</span> Thêm học sinh
+        </a>
+    </section>
+
+    <div class="alert alert-success" th:if="${successMessage}" th:text="${successMessage}"></div>
+
+    <section class="stats-grid">
+        <article class="stat-card">
+            <span class="stat-label">Tổng hồ sơ</span>
+            <strong th:text="${#lists.size(students)}">0</strong>
+            <span class="stat-note" th:text="${#strings.isEmpty(keyword) ? 'Toàn bộ học sinh' : 'Kết quả tìm kiếm'}"></span>
+        </article>
+        <article class="stat-card accent-green">
+            <span class="stat-label">Đang theo học</span>
+            <strong th:text="${activeCount}">0</strong>
+            <span class="stat-note">Hồ sơ đang hoạt động</span>
+        </article>
+    </section>
+
+    <section class="content-card">
+        <div class="card-toolbar">
+            <form class="search-form" method="get" th:action="@{/students}">
+                <label class="sr-only" for="keyword">Tìm kiếm học sinh</label>
+                <span class="search-icon" aria-hidden="true">⌕</span>
+                <input id="keyword" name="keyword" th:value="${keyword}"
+                       placeholder="Tìm theo mã, họ tên hoặc lớp..." autocomplete="off">
+                <button class="btn btn-secondary" type="submit">Tìm kiếm</button>
+                <a class="btn btn-ghost" th:if="${!#strings.isEmpty(keyword)}" th:href="@{/students}">Xóa lọc</a>
+            </form>
+        </div>
+
+        <div class="table-wrap" th:if="${!#lists.isEmpty(students)}">
+            <table>
+                <thead>
+                <tr>
+                    <th>Học sinh</th>
+                    <th>Mã học sinh</th>
+                    <th>Lớp</th>
+                    <th>Liên hệ</th>
+                    <th>Trạng thái</th>
+                    <th class="actions-column">Thao tác</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="student : ${students}">
+                    <td>
+                        <a class="student-cell" th:href="@{/students/{id}(id=${student.id})}">
+                            <span class="avatar" th:text="${#strings.substring(student.fullName, 0, 1)}">H</span>
+                            <span>
+                                <strong th:text="${student.fullName}">Nguyễn Văn An</strong>
+                                <small th:text="${student.gender}">Nam</small>
+                            </span>
+                        </a>
+                    </td>
+                    <td><span class="code" th:text="${student.studentCode}">HS001</span></td>
+                    <td th:text="${student.className}">10A1</td>
+                    <td>
+                        <span class="contact" th:text="${student.email ?: 'Chưa có email'}">email@example.com</span>
+                        <small class="muted" th:text="${student.phone ?: 'Chưa có SĐT'}">0900000000</small>
+                    </td>
+                    <td>
+                        <span class="status" th:classappend="${student.active} ? 'status-active' : 'status-inactive'"
+                              th:text="${student.active} ? 'Đang học' : 'Đã nghỉ'">Đang học</span>
+                    </td>
+                    <td>
+                        <div class="row-actions">
+                            <a class="icon-button" title="Xem chi tiết"
+                               th:href="@{/students/{id}(id=${student.id})}">Xem</a>
+                            <a class="icon-button" title="Chỉnh sửa"
+                               th:href="@{/students/{id}/edit(id=${student.id})}">Sửa</a>
+                            <form th:action="@{/students/{id}/delete(id=${student.id})}" method="post"
+                                  onsubmit="return confirm('Bạn có chắc muốn xóa học sinh này?');">
+                                <button class="icon-button danger" type="submit" title="Xóa học sinh">Xóa</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="empty-state" th:if="${#lists.isEmpty(students)}">
+            <div class="empty-icon">◎</div>
+            <h2 th:text="${#strings.isEmpty(keyword) ? 'Chưa có học sinh nào' : 'Không tìm thấy học sinh'}"></h2>
+            <p th:text="${#strings.isEmpty(keyword) ? 'Hãy tạo hồ sơ học sinh đầu tiên.' : 'Thử một từ khóa khác hoặc xóa bộ lọc.'}"></p>
+            <a class="btn btn-primary" th:if="${#strings.isEmpty(keyword)}" th:href="@{/students/new}">Thêm học sinh</a>
+            <a class="btn btn-secondary" th:unless="${#strings.isEmpty(keyword)}" th:href="@{/students}">Xem tất cả</a>
+        </div>
+    </section>
+</main>
+</body>
+</html>

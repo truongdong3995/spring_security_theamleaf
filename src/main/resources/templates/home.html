@@ -1,10 +1,40 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>EduManager</title>
+    <link rel="stylesheet" th:href="@{/css/students.css}">
 </head>
 <body>
- Hello hello
+<header class="topbar">
+    <a class="brand" th:href="@{/home}">
+        <span class="brand-mark">ED</span>
+        <span>EduManager</span>
+    </a>
+    <nav class="topbar-actions" sec:authorize="isAuthenticated()">
+        <span class="signed-in">Xin chào, <strong sec:authentication="principal.firstName">Bạn</strong></span>
+        <form th:action="@{/logout}" method="post">
+            <button class="btn btn-ghost btn-small" type="submit">Đăng xuất</button>
+        </form>
+    </nav>
+</header>
+
+<main class="page-shell">
+    <section class="page-heading">
+        <div>
+            <p class="eyebrow">TRANG ĐIỀU HÀNH</p>
+            <h1>Chào mừng đến EduManager</h1>
+            <p class="page-description">Quản lý thông tin nhà trường ở một nơi đơn giản.</p>
+        </div>
+    </section>
+
+    <section class="content-card" style="padding: 28px; max-width: 520px;">
+        <p class="eyebrow">CHỨC NĂNG</p>
+        <h2 style="margin: 0 0 8px; color: var(--navy);">Quản lý học sinh</h2>
+        <p style="margin: 0 0 22px; color: var(--muted);">Xem danh sách, tìm kiếm, thêm mới, cập nhật và xóa hồ sơ học sinh.</p>
+        <a class="btn btn-primary" th:href="@{/students}">Mở danh sách học sinh →</a>
+    </section>
+</main>
 </body>
 </html>

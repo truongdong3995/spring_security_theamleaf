@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${pageTitle} + ' - EduManager'">Hồ sơ học sinh</title>
+    <link rel="stylesheet" th:href="@{/css/students.css}">
+</head>
+<body>
+<header class="topbar">
+    <a class="brand" th:href="@{/home}">
+        <span class="brand-mark">ED</span>
+        <span>EduManager</span>
+    </a>
+    <a class="btn btn-ghost btn-small" th:href="@{/students}">Danh sách học sinh</a>
+</header>
+
+<main class="form-shell">
+    <a class="back-link" th:href="${isEdit} ? @{/students/{id}(id=${studentId})} : @{/students}">← Quay lại</a>
+
+    <section class="form-card">
+        <div class="form-intro">
+            <p class="eyebrow" th:text="${isEdit} ? 'CHỈNH SỬA HỒ SƠ' : 'HỒ SƠ MỚI'">HỒ SƠ MỚI</p>
+            <h1 th:text="${pageTitle}">Thêm học sinh</h1>
+            <p>Nhập các thông tin cơ bản. Những trường có dấu <span class="required">*</span> là bắt buộc.</p>
+        </div>
+
+        <form class="student-form" th:object="${studentForm}"
+              th:action="${isEdit} ? @{/students/{id}(id=${studentId})} : @{/students}" method="post">
+            <div class="form-section-title">
+                <span>01</span>
+                <div><strong>Thông tin học tập</strong><small>Mã định danh và lớp hiện tại</small></div>
+            </div>
+
+            <div class="form-grid">
+                <div class="field">
+                    <label for="studentCode">Mã học sinh <span class="required">*</span></label>
+                    <input id="studentCode" th:field="*{studentCode}" maxlength="20" placeholder="Ví dụ: HS001"
+                           th:classappend="${#fields.hasErrors('studentCode')} ? 'input-error'" autofocus>
+                    <small class="field-error" th:errors="*{studentCode}"></small>
+                </div>
+                <div class="field">
+                    <label for="className">Lớp <span class="required">*</span></label>
+                    <input id="className" th:field="*{className}" maxlength="30" placeholder="Ví dụ: 10A1"
+                           th:classappend="${#fields.hasErrors('className')} ? 'input-error'">
+                    <small class="field-error" th:errors="*{className}"></small>
+                </div>
+            </div>
+
+            <div class="form-section-title">
+                <span>02</span>
+                <div><strong>Thông tin cá nhân</strong><small>Thông tin nhận diện của học sinh</small></div>
+            </div>
+
+            <div class="form-grid">
+                <div class="field field-wide">
+                    <label for="fullName">Họ và tên <span class="required">*</span></label>
+                    <input id="fullName" th:field="*{fullName}" maxlength="100" placeholder="Nhập đầy đủ họ và tên"
+                           th:classappend="${#fields.hasErrors('fullName')} ? 'input-error'">
+                    <small class="field-error" th:errors="*{fullName}"></small>
+                </div>
+                <div class="field">
+                    <label for="dateOfBirth">Ngày sinh</label>
+                    <input id="dateOfBirth" type="date" th:field="*{dateOfBirth}"
+                           th:classappend="${#fields.hasErrors('dateOfBirth')} ? 'input-error'">
+                    <small class="field-error" th:errors="*{dateOfBirth}"></small>
+                </div>
+                <div class="field">
+                    <label for="gender">Giới tính <span class="required">*</span></label>
+                    <select id="gender" th:field="*{gender}"
+                            th:classappend="${#fields.hasErrors('gender')} ? 'input-error'">
+                        <option value="">-- Chọn giới tính --</option>
+                        <option value="Nam">Nam</option>
+                        <option value="Nữ">Nữ</option>
+                        <option value="Khác">Khác</option>
+                    </select>
+                    <small class="field-error" th:errors="*{gender}"></small>
+                </div>
+            </div>
+
+            <div class="form-section-title">
+                <span>03</span>
+                <div><strong>Liên hệ và trạng thái</strong><small>Thông tin dùng để liên lạc, có thể để trống</small></div>
+            </div>
+
+            <div class="form-grid">
+                <div class="field">
+                    <label for="email">Email</label>
+                    <input id="email" type="email" th:field="*{email}" maxlength="100" placeholder="hocsinh@example.com"
+                           th:classappend="${#fields.hasErrors('email')} ? 'input-error'">
+                    <small class="field-error" th:errors="*{email}"></small>
+                </div>
+                <div class="field">
+                    <label for="phone">Số điện thoại</label>
+                    <input id="phone" type="tel" th:field="*{phone}" maxlength="15" placeholder="0901 234 567"
+                           th:classappend="${#fields.hasErrors('phone')} ? 'input-error'">
+                    <small class="field-error" th:errors="*{phone}"></small>
+                </div>
+                <label class="switch-field field-wide">
+                    <input type="checkbox" th:field="*{active}">
+                    <span class="switch" aria-hidden="true"></span>
+                    <span><strong>Đang theo học</strong><small>Tắt nếu học sinh đã nghỉ hoặc chuyển trường</small></span>
+                </label>
+            </div>
+
+            <div class="form-actions">
+                <a class="btn btn-ghost" th:href="@{/students}">Hủy bỏ</a>
+                <button class="btn btn-primary" type="submit" th:text="${isEdit} ? 'Lưu thay đổi' : 'Tạo hồ sơ'">Tạo hồ sơ</button>
+            </div>
+        </form>
+    </section>
+</main>
+</body>
+</html>
