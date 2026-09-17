@@ -11,6 +11,10 @@ java {
 	sourceCompatibility = '17'
 }
 
+tasks.withType(JavaCompile).configureEach {
+	options.encoding = 'UTF-8'
+}
+
 configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
@@ -38,6 +42,7 @@ dependencies {
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
+	testRuntimeOnly 'com.h2database:h2'
 }
 
 tasks.named('test') {

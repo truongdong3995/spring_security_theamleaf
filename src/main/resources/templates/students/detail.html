@@ -70,6 +70,16 @@
                 <a class="quick-action" th:href="@{/students/{id}/edit(id=${student.id})}">
                     <span>✎</span><span><strong>Cập nhật thông tin</strong><small>Chỉnh sửa hồ sơ học sinh</small></span>
                 </a>
+                <form th:action="@{/students/{id}/toggle-status(id=${student.id})}" method="post">
+                    <input type="hidden" name="returnTo" value="detail">
+                    <button class="quick-action" type="submit">
+                        <span>↻</span>
+                        <span>
+                            <strong th:text="${student.active} ? 'Đánh dấu đã nghỉ' : 'Đánh dấu đang học'">Đổi trạng thái</strong>
+                            <small>Cập nhật nhanh trạng thái hồ sơ</small>
+                        </span>
+                    </button>
+                </form>
                 <a class="quick-action" th:href="@{/students}">
                     <span>☷</span><span><strong>Danh sách học sinh</strong><small>Trở về trang quản lý</small></span>
                 </a>

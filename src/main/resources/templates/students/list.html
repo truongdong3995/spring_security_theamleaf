@@ -29,9 +29,15 @@
             <h1>Quản lý học sinh</h1>
             <p class="page-description">Theo dõi hồ sơ, lớp học và trạng thái của học sinh.</p>
         </div>
-        <a class="btn btn-primary" th:href="@{/students/new}">
-            <span aria-hidden="true">＋</span> Thêm học sinh
-        </a>
+        <div class="heading-actions">
+            <a class="btn btn-secondary"
+               th:href="@{/students/export(keyword=${keyword},className=${className},status=${status},sort=${sort})}">
+                <span aria-hidden="true">⇩</span> Xuất CSV
+            </a>
+            <a class="btn btn-primary" th:href="@{/students/new}">
+                <span aria-hidden="true">＋</span> Thêm học sinh
+            </a>
+        </div>
     </section>
 
     <div class="alert alert-success" th:if="${successMessage}" th:text="${successMessage}"></div>
@@ -39,25 +45,65 @@
     <section class="stats-grid">
         <article class="stat-card">
             <span class="stat-label">Tổng hồ sơ</span>
-            <strong th:text="${#lists.size(students)}">0</strong>
-            <span class="stat-note" th:text="${#strings.isEmpty(keyword) ? 'Toàn bộ học sinh' : 'Kết quả tìm kiếm'}"></span>
+            <strong th:text="${totalCount}">0</strong>
+            <span class="stat-note">Toàn bộ học sinh</span>
         </article>
         <article class="stat-card accent-green">
             <span class="stat-label">Đang theo học</span>
             <strong th:text="${activeCount}">0</strong>
             <span class="stat-note">Hồ sơ đang hoạt động</span>
         </article>
+        <article class="stat-card accent-amber">
+            <span class="stat-label">Kết quả phù hợp</span>
+            <strong th:text="${filteredCount}">0</strong>
+            <span class="stat-note">Theo bộ lọc hiện tại</span>
+        </article>
     </section>
 
     <section class="content-card">
         <div class="card-toolbar">
-            <form class="search-form" method="get" th:action="@{/students}">
-                <label class="sr-only" for="keyword">Tìm kiếm học sinh</label>
-                <span class="search-icon" aria-hidden="true">⌕</span>
-                <input id="keyword" name="keyword" th:value="${keyword}"
-                       placeholder="Tìm theo mã, họ tên hoặc lớp..." autocomplete="off">
-                <button class="btn btn-secondary" type="submit">Tìm kiếm</button>
-                <a class="btn btn-ghost" th:if="${!#strings.isEmpty(keyword)}" th:href="@{/students}">Xóa lọc</a>
+            <form class="filter-form" method="get" th:action="@{/students}">
+                <div class="filter-field filter-search">
+                    <label for="keyword">Tìm kiếm</label>
+                    <div class="search-control">
+                        <span class="search-icon" aria-hidden="true">⌕</span>
+                        <input id="keyword" name="keyword" th:value="${keyword}"
+                               placeholder="Mã, họ tên hoặc lớp..." autocomplete="off">
+                    </div>
+                </div>
+                <div class="filter-field">
+                    <label for="className">Lớp</label>
+                    <select id="className" name="className">
+                        <option value="">Tất cả lớp</option>
+                        <option th:each="option : ${classNames}" th:value="${option}" th:text="${option}"
+                                th:selected="${option == className}">10A1</option>
+                    </select>
+                </div>
+                <div class="filter-field">
+                    <label for="status">Trạng thái</label>
+                    <select id="status" name="status">
+                        <option value="all" th:selected="${status == 'all'}">Tất cả trạng thái</option>
+                        <option value="active" th:selected="${status == 'active'}">Đang học</option>
+                        <option value="inactive" th:selected="${status == 'inactive'}">Đã nghỉ</option>
+                    </select>
+                </div>
+                <div class="filter-field">
+                    <label for="sort">Sắp xếp</label>
+                    <select id="sort" name="sort">
+                        <option value="name_asc" th:selected="${sort == 'name_asc'}">Tên A → Z</option>
+                        <option value="name_desc" th:selected="${sort == 'name_desc'}">Tên Z → A</option>
+                        <option value="code_asc" th:selected="${sort == 'code_asc'}">Mã tăng dần</option>
+                        <option value="code_desc" th:selected="${sort == 'code_desc'}">Mã giảm dần</option>
+                        <option value="class_asc" th:selected="${sort == 'class_asc'}">Theo lớp</option>
+                    </select>
+                </div>
+                <div class="filter-actions">
+                    <button class="btn btn-primary" type="submit">Áp dụng</button>
+                    <a class="btn btn-ghost" th:href="@{/students}"
+                       th:if="${!#strings.isEmpty(keyword) or !#strings.isEmpty(className) or status != 'all' or sort != 'name_asc'}">
+                        Xóa lọc
+                    </a>
+                </div>
             </form>
         </div>
 
@@ -100,6 +146,16 @@
                                th:href="@{/students/{id}(id=${student.id})}">Xem</a>
                             <a class="icon-button" title="Chỉnh sửa"
                                th:href="@{/students/{id}/edit(id=${student.id})}">Sửa</a>
+                            <form th:action="@{/students/{id}/toggle-status(id=${student.id})}" method="post">
+                                <input type="hidden" name="returnTo" value="list">
+                                <input type="hidden" name="keyword" th:value="${keyword}">
+                                <input type="hidden" name="className" th:value="${className}">
+                                <input type="hidden" name="status" th:value="${status}">
+                                <input type="hidden" name="sort" th:value="${sort}">
+                                <input type="hidden" name="page" th:value="${studentPage.number}">
+                                <button class="icon-button" type="submit"
+                                        th:title="${student.active} ? 'Đánh dấu đã nghỉ' : 'Đánh dấu đang học'">Đổi trạng thái</button>
+                            </form>
                             <form th:action="@{/students/{id}/delete(id=${student.id})}" method="post"
                                   onsubmit="return confirm('Bạn có chắc muốn xóa học sinh này?');">
                                 <button class="icon-button danger" type="submit" title="Xóa học sinh">Xóa</button>
@@ -113,11 +169,25 @@
 
         <div class="empty-state" th:if="${#lists.isEmpty(students)}">
             <div class="empty-icon">◎</div>
-            <h2 th:text="${#strings.isEmpty(keyword) ? 'Chưa có học sinh nào' : 'Không tìm thấy học sinh'}"></h2>
-            <p th:text="${#strings.isEmpty(keyword) ? 'Hãy tạo hồ sơ học sinh đầu tiên.' : 'Thử một từ khóa khác hoặc xóa bộ lọc.'}"></p>
-            <a class="btn btn-primary" th:if="${#strings.isEmpty(keyword)}" th:href="@{/students/new}">Thêm học sinh</a>
-            <a class="btn btn-secondary" th:unless="${#strings.isEmpty(keyword)}" th:href="@{/students}">Xem tất cả</a>
+            <h2 th:text="${totalCount == 0 ? 'Chưa có học sinh nào' : 'Không tìm thấy học sinh'}"></h2>
+            <p th:text="${totalCount == 0 ? 'Hãy tạo hồ sơ học sinh đầu tiên.' : 'Thử thay đổi từ khóa hoặc bộ lọc.'}"></p>
+            <a class="btn btn-primary" th:if="${totalCount == 0}" th:href="@{/students/new}">Thêm học sinh</a>
+            <a class="btn btn-secondary" th:unless="${totalCount == 0}" th:href="@{/students}">Xem tất cả</a>
         </div>
+
+        <nav class="pagination" aria-label="Phân trang" th:if="${studentPage.totalPages > 1}">
+            <a class="btn btn-ghost btn-small" th:if="${studentPage.hasPrevious()}"
+               th:href="@{/students(keyword=${keyword},className=${className},status=${status},sort=${sort},page=${studentPage.number - 1})}">
+                ← Trang trước
+            </a>
+            <span class="btn btn-ghost btn-small disabled" th:unless="${studentPage.hasPrevious()}">← Trang trước</span>
+            <span class="page-number" th:text="|Trang ${studentPage.number + 1} / ${studentPage.totalPages}|">Trang 1 / 1</span>
+            <a class="btn btn-ghost btn-small" th:if="${studentPage.hasNext()}"
+               th:href="@{/students(keyword=${keyword},className=${className},status=${status},sort=${sort},page=${studentPage.number + 1})}">
+                Trang sau →
+            </a>
+            <span class="btn btn-ghost btn-small disabled" th:unless="${studentPage.hasNext()}">Trang sau →</span>
+        </nav>
     </section>
 </main>
 </body>
